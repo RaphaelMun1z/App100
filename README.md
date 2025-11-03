@@ -38,6 +38,20 @@ Aqui demonstro a aplicação direta de diferentes tipos de busca, conforme o con
 * **Busca Binária:**
     * Implementada para **buscar dados de um passageiro**. É utilizada em cenários onde a lista de dados (passageiros, histórico de corridas) é **mantida ordenada por ID ou data**, garantindo um tempo de busca eficiente (logarítmico).
 
+### 3. Análise de Complexidade
+
+**Busca Sequencial (Tipos de Corrida):**
+* **Complexidade:** $O(n)$ (Pior/Caso Médio).
+* **Propósito no Sistema:** É a busca mais lenta, mas a forma mais simples de listar elementos em listas **pequenas e não ordenadas** no projeto (como os tipos de serviço).
+
+**Busca Binária (Dados do Passageiro por ID):**
+* **Complexidade:** $O(\log n)$ (Pior/Caso Médio).
+* **Propósito no Sistema:** É a busca mais rápida. É crucial para capturar dados de um **passageiro específico pelo ID** em uma lista de usuários que está **mantida ordenada**, pois a cada passo, metade dos dados é eliminada.
+
+**Algoritmo Rabin-Karp (Filtragem de Chat):**
+* **Complexidade:** $O(n + m)$ (Caso Médio).
+* **Propósito no Sistema:** É o algoritmo de **Busca de Padrão** mais eficiente. Utiliza *hashing* para detectar rapidamente a presença de palavras sensíveis (o padrão, $m$) dentro de longas mensagens de chat (o texto, $n$).
+
 ## 🛠️ Como Executar o Projeto
 
 1.  Clone este repositório:
