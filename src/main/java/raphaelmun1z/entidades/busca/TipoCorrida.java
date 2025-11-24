@@ -1,4 +1,4 @@
-package raphaelmun1z.entidades;
+package raphaelmun1z.entidades.busca;
 
 public class TipoCorrida {
     private Long id;

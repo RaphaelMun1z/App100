@@ -1,4 +1,7 @@
-package raphaelmun1z.entidades;
+package raphaelmun1z.entidades.rabinKarp;
+
+import raphaelmun1z.entidades.usuario.Motorista;
+import raphaelmun1z.entidades.usuario.Passageiro;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,6 @@
-package raphaelmun1z.servicos;
+package raphaelmun1z.servicos.usuario;
 
-import raphaelmun1z.entidades.Motorista;
-import raphaelmun1z.entidades.Passageiro;
-import raphaelmun1z.entidades.TipoCorrida;
+import raphaelmun1z.entidades.usuario.Passageiro;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

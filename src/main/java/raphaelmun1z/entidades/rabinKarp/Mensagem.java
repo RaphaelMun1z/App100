@@ -1,4 +1,6 @@
-package raphaelmun1z.entidades;
+package raphaelmun1z.entidades.rabinKarp;
+
+import raphaelmun1z.entidades.usuario.Usuario;
 
 public class Mensagem {
     private Long id;

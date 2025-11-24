@@ -1,4 +1,4 @@
-package raphaelmun1z.entidades;
+package raphaelmun1z.entidades.usuario;
 
 import java.time.LocalDate;
 

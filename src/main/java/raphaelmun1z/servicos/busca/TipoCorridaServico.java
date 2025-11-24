@@ -1,6 +1,6 @@
-package raphaelmun1z.servicos;
+package raphaelmun1z.servicos.busca;
 
-import raphaelmun1z.entidades.TipoCorrida;
+import raphaelmun1z.entidades.busca.TipoCorrida;
 
 import java.util.ArrayList;
 import java.util.List;

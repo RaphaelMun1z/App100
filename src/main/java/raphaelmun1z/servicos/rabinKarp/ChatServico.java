@@ -1,6 +1,9 @@
-package raphaelmun1z.servicos;
+package raphaelmun1z.servicos.rabinKarp;
 
-import raphaelmun1z.entidades.*;
+import raphaelmun1z.entidades.rabinKarp.Chat;
+import raphaelmun1z.entidades.rabinKarp.Mensagem;
+import raphaelmun1z.entidades.usuario.Motorista;
+import raphaelmun1z.entidades.usuario.Passageiro;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
