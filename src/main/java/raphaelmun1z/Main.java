@@ -11,6 +11,8 @@ import raphaelmun1z.entidades.usuario.Motorista;
 import raphaelmun1z.entidades.usuario.Passageiro;
 import raphaelmun1z.entidades.interfaces.IGrafo;
 import raphaelmun1z.servicos.busca.TipoCorridaServico;
+import raphaelmun1z.servicos.grafo.GrafoListaService;
+import raphaelmun1z.servicos.grafo.GrafoMatrizService;
 import raphaelmun1z.servicos.huffman.CompressaoServico;
 import raphaelmun1z.servicos.rabinKarp.ChatServico;
 import raphaelmun1z.servicos.usuario.MotoristaServico;
@@ -29,17 +31,30 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         Menu menuGrafos = new Menu("MÓDULO DE GRAFOS (MAPAS)");
-        menuGrafos.adicionarOpcao(1, "Testar Matriz de Adjacência",
-            () -> rodarCenarioBaixada(new GrafoMatriz(10), "Matriz"));
+        menuGrafos.adicionarOpcao(1, "Matriz de Adjacência", () -> {
+            IGrafo matriz = new GrafoMatrizService(10);
+            inicializarCenarioBaixada(matriz);
+            executarMenuCRUD(matriz, scanner, "Matriz");
+        });
 
-        menuGrafos.adicionarOpcao(2, "Testar Lista de Adjacência",
-            () -> rodarCenarioBaixada(new GrafoLista(), "Lista"));
+        menuGrafos.adicionarOpcao(2, "Lista de Adjacência", () -> {
+            IGrafo lista = new GrafoListaService();
+            inicializarCenarioBaixada(lista);
+            executarMenuCRUD(lista, scanner, "Lista");
+        });
 
-        menuGrafos.adicionarOpcao(3, "Comparar Ambas", () -> {
+        menuGrafos.adicionarOpcao(3, "Comparar Implementações", () -> {
             IO.println("\n>>> Comparando Implementações...");
-            rodarCenarioBaixada(new GrafoMatriz(10), "Matriz");
-            IO.println("-----------------------------------");
-            rodarCenarioBaixada(new GrafoLista(), "Lista");
+            IGrafo m = new GrafoMatrizService(10);
+            IGrafo l = new GrafoListaService();
+
+            IO.println("--- MATRIZ ---");
+            inicializarCenarioBaixada(m);
+            m.imprimirMapa();
+
+            IO.println("--- LISTA ---");
+            inicializarCenarioBaixada(l);
+            l.imprimirMapa();
         });
 
         Menu menuPrincipal = new Menu("APP 100 - MENU PRINCIPAL");
@@ -57,6 +72,89 @@ public class Main {
 
         menuPrincipal.executar(scanner);
         scanner.close();
+    }
+
+    private static void executarMenuCRUD(IGrafo grafo, Scanner scanner, String tipo) {
+        Menu menuCrud = new Menu("GERENCIAR MAPA (" + tipo + ")");
+
+        menuCrud.adicionarOpcao(1, "Visualizar Mapa", grafo::imprimirMapa);
+        menuCrud.adicionarOpcao(2, "Adicionar Cidade", () -> uiAdicionarCidade(grafo, scanner));
+        menuCrud.adicionarOpcao(3, "Remover Cidade", () -> uiRemoverCidade(grafo, scanner));
+        menuCrud.adicionarOpcao(4, "Adicionar Rota", () -> uiAdicionarRota(grafo, scanner));
+        menuCrud.adicionarOpcao(5, "Remover Rota", () -> uiRemoverRota(grafo, scanner));
+        menuCrud.adicionarOpcao(6, "Verificar Conexão", () -> uiVerificarRota(grafo, scanner));
+
+        menuCrud.executar(scanner);
+    }
+
+    private static void uiAdicionarCidade(IGrafo grafo, Scanner scanner) {
+        System.out.print("Nome da nova cidade: ");
+        String nome = scanner.nextLine();
+        grafo.adicionarCidade(nome);
+    }
+
+    private static void uiRemoverCidade(IGrafo grafo, Scanner scanner) {
+        System.out.print("Nome da cidade para remover: ");
+        String nome = scanner.nextLine();
+        grafo.removerCidade(nome);
+    }
+
+    private static void uiAdicionarRota(IGrafo grafo, Scanner scanner) {
+        try {
+            System.out.print("Origem: ");
+            String origem = scanner.nextLine();
+            System.out.print("Destino: ");
+            String destino = scanner.nextLine();
+
+            System.out.print("Peso (Distância/Custo): ");
+            int peso = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("É mão dupla? (S/N): ");
+            String resp = scanner.nextLine();
+            boolean bidirecional = resp.equalsIgnoreCase("S");
+
+            grafo.adicionarRota(origem, destino, peso, bidirecional);
+            IO.println("Rota adicionada/atualizada!");
+        } catch (NumberFormatException e) {
+            IO.println("Erro: Peso deve ser um número inteiro.");
+        }
+    }
+
+    private static void uiRemoverRota(IGrafo grafo, Scanner scanner) {
+        System.out.print("Origem: ");
+        String origem = scanner.nextLine();
+        System.out.print("Destino: ");
+        String destino = scanner.nextLine();
+
+        System.out.print("Remover volta também? (S/N): ");
+        boolean bidirecional = scanner.nextLine().equalsIgnoreCase("S");
+
+        grafo.removerRota(origem, destino, bidirecional);
+        IO.println("Rota removida.");
+    }
+
+    private static void uiVerificarRota(IGrafo grafo, Scanner scanner) {
+        System.out.print("Origem: ");
+        String origem = scanner.nextLine();
+        System.out.print("Destino: ");
+        String destino = scanner.nextLine();
+
+        boolean existe = grafo.temRota(origem, destino);
+        IO.println(existe ? ">>> EXISTE uma rota direta." : ">>> NÃO existe rota direta.");
+    }
+
+    private static void inicializarCenarioBaixada(IGrafo mapa) {
+        mapa.adicionarCidade("Santos");
+        mapa.adicionarCidade("SV");
+        mapa.adicionarCidade("PG");
+        mapa.adicionarCidade("Guaruja");
+        mapa.adicionarCidade("Cubatao");
+
+        mapa.adicionarRota("Santos", "SV", 5, true);
+        mapa.adicionarRota("SV", "PG", 8, true);
+        mapa.adicionarRota("Santos", "Guaruja", 20, true);
+        mapa.adicionarRota("Santos", "Cubatao", 15, true);
+        mapa.adicionarRota("Cubatao", "SV", 12, true);
     }
 
     private static void inicializarServicos() {
