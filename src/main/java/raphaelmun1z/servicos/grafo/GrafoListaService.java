@@ -2,9 +2,11 @@ package raphaelmun1z.servicos.grafo;
 
 import raphaelmun1z.entidades.grafo.Aresta;
 import raphaelmun1z.entidades.grafo.GrafoLista;
+import raphaelmun1z.entidades.grafo.Rota;
 import raphaelmun1z.entidades.interfaces.IGrafo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -77,5 +79,33 @@ public class GrafoListaService implements IGrafo {
             System.out.print(cidade + " conecta com: ");
             System.out.println(grafo.getAdjList().get(cidade));
         }
+    }
+
+    @Override
+    public List<Rota> obterRotasPartindoDe(String origem) {
+        List<Rota> rotasDeSaida = new ArrayList<>();
+        List<Aresta> arestas = grafo.getAdjList().get(origem);
+
+        if (arestas != null) {
+            for (Aresta aresta : arestas) {
+                rotasDeSaida.add(new Rota(origem, aresta.getDestino(), aresta.getPeso()));
+            }
+        }
+        return rotasDeSaida;
+    }
+
+    @Override
+    public List<String> obterCidades() {
+        return new ArrayList<>(grafo.getAdjList().keySet());
+    }
+
+    @Override
+    public Map<String, List<Rota>> obterTodasAdjacencias() {
+        Map<String, List<Rota>> todasAdjacencias = new HashMap<>();
+
+        for (String cidade : grafo.getAdjList().keySet()) {
+            todasAdjacencias.put(cidade, obterRotasPartindoDe(cidade));
+        }
+        return todasAdjacencias;
     }
 }

@@ -1,7 +1,13 @@
 package raphaelmun1z.servicos.grafo;
 
 import raphaelmun1z.entidades.grafo.GrafoMatriz;
+import raphaelmun1z.entidades.grafo.Rota;
 import raphaelmun1z.entidades.interfaces.IGrafo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GrafoMatrizService implements IGrafo {
 
@@ -104,5 +110,41 @@ public class GrafoMatrizService implements IGrafo {
             }
             IO.println();
         }
+    }
+
+    @Override
+    public List<Rota> obterRotasPartindoDe(String origem) {
+        List<Rota> rotasDeSaida = new ArrayList<>();
+        int ii = getIndice(origem);
+
+        if (ii != -1) {
+            int tamanho = grafo.getCidades().size();
+            int[][] matriz = grafo.getMatriz();
+
+            for (int jj = 0; jj < tamanho; jj++) {
+                int peso = matriz[ii][jj];
+                if (peso != 0) {
+                    String destino = grafo.getCidades().get(jj);
+                    rotasDeSaida.add(new Rota(origem, destino, peso));
+                }
+            }
+        }
+        return rotasDeSaida;
+    }
+
+    @Override
+    public List<String> obterCidades() {
+        return grafo.getCidades();
+    }
+
+    @Override
+    public Map<String, List<Rota>> obterTodasAdjacencias() {
+        Map<String, List<Rota>> todasAdjacencias = new HashMap<>();
+        List<String> cidades = grafo.getCidades();
+
+        for (String cidade : cidades) {
+            todasAdjacencias.put(cidade, obterRotasPartindoDe(cidade));
+        }
+        return todasAdjacencias;
     }
 }

@@ -3,8 +3,7 @@ package raphaelmun1z;
 import raphaelmun1z.dto.ResultadoCompressao;
 import raphaelmun1z.entidades.huffman.RelatorioCompressao;
 import raphaelmun1z.entidades.rabinKarp.Chat;
-import raphaelmun1z.entidades.grafo.GrafoLista;
-import raphaelmun1z.entidades.grafo.GrafoMatriz;
+import raphaelmun1z.entidades.grafo.Rota;
 import raphaelmun1z.entidades.rabinKarp.Mensagem;
 import raphaelmun1z.entidades.sistema.Menu;
 import raphaelmun1z.entidades.usuario.Motorista;
@@ -13,11 +12,14 @@ import raphaelmun1z.entidades.interfaces.IGrafo;
 import raphaelmun1z.servicos.busca.TipoCorridaServico;
 import raphaelmun1z.servicos.grafo.GrafoListaService;
 import raphaelmun1z.servicos.grafo.GrafoMatrizService;
+import raphaelmun1z.servicos.grafo.GrafoOtimizacaoService;
 import raphaelmun1z.servicos.huffman.CompressaoServico;
 import raphaelmun1z.servicos.rabinKarp.ChatServico;
 import raphaelmun1z.servicos.usuario.MotoristaServico;
 import raphaelmun1z.servicos.usuario.PassageiroServico;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
@@ -25,22 +27,24 @@ public class Main {
     private static PassageiroServico passageiroServico;
     private static TipoCorridaServico tipoCorridaServico;
     private static ChatServico chatServico;
+    private static GrafoOtimizacaoService otimizacaoServico;
 
     static void main() {
         inicializarServicos();
+        otimizacaoServico = new GrafoOtimizacaoService();
         Scanner scanner = new Scanner(System.in);
 
         Menu menuGrafos = new Menu("MÓDULO DE GRAFOS (MAPAS)");
         menuGrafos.adicionarOpcao(1, "Matriz de Adjacência", () -> {
             IGrafo matriz = new GrafoMatrizService(10);
             inicializarCenarioBaixada(matriz);
-            executarMenuCRUD(matriz, scanner, "Matriz");
+            executarMenuGrafo(matriz, scanner, "Matriz");
         });
 
         menuGrafos.adicionarOpcao(2, "Lista de Adjacência", () -> {
             IGrafo lista = new GrafoListaService();
             inicializarCenarioBaixada(lista);
-            executarMenuCRUD(lista, scanner, "Lista");
+            executarMenuGrafo(lista, scanner, "Lista");
         });
 
         menuGrafos.adicionarOpcao(3, "Comparar Implementações", () -> {
@@ -72,6 +76,22 @@ public class Main {
 
         menuPrincipal.executar(scanner);
         scanner.close();
+    }
+
+    private static void executarMenuGrafo(IGrafo grafo, Scanner scanner, String tipo) {
+        Menu menuAcoes = new Menu("MAPA DE GRAFOS (" + tipo + ")");
+
+        menuAcoes.adicionarOpcao(1, "Visualizar Mapa", grafo::imprimirMapa);
+        menuAcoes.adicionarOpcao(2, "Gerenciar Cidades/Rotas", () -> executarMenuCRUD(grafo, scanner, tipo));
+
+        menuAcoes.adicionarOpcao(3, "(DFS) Exploração de Rotas", () -> uiBuscaDFS(grafo, scanner));
+        menuAcoes.adicionarOpcao(4, "(BFS) Alcance de Notificação", () -> uiBuscaBFS(grafo, scanner));
+        menuAcoes.adicionarOpcao(5, "(Dijkstra) Rota de Viagem Mais Rápida", () -> uiDijkstra(grafo, scanner));
+
+        menuAcoes.adicionarOpcao(6, "(AGM) Otimizar Rede de Abastecimento", () -> uiAGM(grafo, scanner));
+        menuAcoes.adicionarOpcao(7, "(Topológica) Sequenciar Manutenção de Frota", () -> uiTopologica(grafo, scanner));
+
+        menuAcoes.executar(scanner);
     }
 
     private static void executarMenuCRUD(IGrafo grafo, Scanner scanner, String tipo) {
@@ -241,28 +261,95 @@ public class Main {
     }
 
     // Grafos
-    private static void rodarCenarioBaixada(IGrafo mapa, String nomeImplementacao) {
-        IO.println("\n[Grafo] " + nomeImplementacao + "\n");
+    private static void uiBuscaDFS(IGrafo grafo, Scanner scanner) {
+        System.out.print("Origem (Exploração Inicia): ");
+        String origem = scanner.nextLine();
+        System.out.print("Alvo (Tesouro Encontrado): ");
+        String alvo = scanner.nextLine();
 
-        mapa.adicionarCidade("Santos");
-        mapa.adicionarCidade("SV");
-        mapa.adicionarCidade("PG");
-        mapa.adicionarCidade("Guaruja");
-        mapa.adicionarCidade("Cubatao");
+        List<String> caminho = otimizacaoServico.buscaProfundidadeDFS(grafo, origem, alvo);
 
-        mapa.adicionarRota("Santos", "SV", 5, true);
-        mapa.adicionarRota("SV", "PG", 8, true);
-        mapa.adicionarRota("Santos", "Guaruja", 20, true);
-        mapa.adicionarRota("Santos", "Cubatao", 15, true);
-        mapa.adicionarRota("Cubatao", "SV", 12, true);
+        IO.println("\n[DFS] Caminho de Exploração (Tesouro):");
+        if (caminho.isEmpty()) {
+            IO.println("Caminho não encontrado ou alvo inalcançável.");
+        } else {
+            IO.println("Caminho percorrido: " + String.join(" -> ", caminho));
+        }
+    }
 
-        mapa.imprimirMapa();
+    private static void uiBuscaBFS(IGrafo grafo, Scanner scanner) {
+        System.out.print("Origem (Notícia Inicia): ");
+        String origem = scanner.nextLine();
 
-        IO.println("Tem rota Santos -> PG? " + (mapa.temRota("Santos", "PG") ? "Sim" : "Não"));
+        Map<String, Integer> distancias = otimizacaoServico.buscaLarguraBFS(grafo, origem);
 
-        IO.println("Removendo rota Santos <-> Guarujá...");
-        mapa.removerRota("Santos", "Guaruja", true);
+        IO.println("\n[BFS] Distância de Conexão (Propagação da Notícia):");
+        distancias.forEach((cidade, dist) -> {
+            if (dist != Integer.MAX_VALUE) {
+                IO.println("- " + cidade + ": " + dist + " conexões de distância.");
+            } else {
+                IO.println("- " + cidade + ": Inalcançável.");
+            }
+        });
+    }
 
-        mapa.imprimirMapa();
+    private static void uiDijkstra(IGrafo grafo, Scanner scanner) {
+        System.out.print("Origem (Viagem Inicia): ");
+        String origem = scanner.nextLine();
+        System.out.print("Destino (Viagem Termina): ");
+        String destino = scanner.nextLine();
+
+        List<String> caminho = otimizacaoServico.dijkstra(grafo, origem, destino);
+
+        IO.println("\n[DIJKSTRA] Rota de Menor Custo (Mais Rápida):");
+        if (caminho.isEmpty()) {
+            IO.println("Rota não encontrada ou destino inalcançável.");
+        } else {
+            IO.println("Caminho Otimizado: " + String.join(" -> ", caminho));
+        }
+    }
+
+    private static void uiAGM(IGrafo grafo, Scanner scanner) {
+        System.out.print("Ponto de Início da Rede (Ex: Santos): ");
+        String inicio = scanner.nextLine();
+
+        List<Rota> agm = otimizacaoServico.arvoreGeradoraMinimaAGM(grafo, inicio);
+
+        long custoTotal = agm.stream().mapToLong(Rota::getPeso).sum();
+
+        IO.println("\n[AGM] Otimização de Infraestrutura (Menor Custo):");
+        if (agm.isEmpty() && grafo.obterCidades().size() > 1) {
+            IO.println("AVISO: AGM não encontrada. O grafo pode ser desconexo.");
+        } else {
+            IO.println("Rotas essenciais (AGM) para conectar as cidades com custo mínimo:");
+            for (Rota rota : agm) {
+                IO.println("- " + rota.getOrigem() + " -> " + rota.getDestino() + " (Custo: " + rota.getPeso() + ")");
+            }
+            IO.println("CUSTO TOTAL DA INFRAESTRUTURA OTIMIZADA: " + custoTotal);
+        }
+    }
+
+    private static void uiTopologica(IGrafo grafo, Scanner scanner) {
+        IGrafo grafoDAG = new GrafoListaService();
+        grafoDAG.adicionarCidade("Verificar Pneus");
+        grafoDAG.adicionarCidade("Trocar Oleo");
+        grafoDAG.adicionarCidade("Teste de Freios");
+        grafoDAG.adicionarCidade("Limpar Veiculo");
+        grafoDAG.adicionarCidade("Liberar para Rodar");
+
+        grafoDAG.adicionarRota("Verificar Pneus", "Teste de Freios", 1, false);
+        grafoDAG.adicionarRota("Trocar Oleo", "Teste de Freios", 1, false);
+        grafoDAG.adicionarRota("Teste de Freios", "Limpar Veiculo", 1, false);
+        grafoDAG.adicionarRota("Limpar Veiculo", "Liberar para Rodar", 1, false);
+
+        List<String> ordem = otimizacaoServico.ordenacaoTopologica(grafoDAG);
+
+        IO.println("\n[ORDENAÇÃO TOPOLÓGICA] Sequência de Tarefas de Frota (Manutenção):");
+        if (ordem.isEmpty()) {
+            IO.println("Não foi possível gerar a sequência (Possível Ciclo/Dependência Mútua).");
+        } else {
+            IO.println("Ordem Otimizada de Execução (Tarefa sem Precedência primeiro):");
+            IO.println("Sequência: " + String.join(" -> ", ordem));
+        }
     }
 }
