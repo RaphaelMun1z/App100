@@ -262,14 +262,14 @@ public class Main {
 
     // Grafos
     private static void uiBuscaDFS(IGrafo grafo, Scanner scanner) {
-        System.out.print("Origem (Exploração Inicia): ");
+        System.out.print("Origem: ");
         String origem = scanner.nextLine();
-        System.out.print("Alvo (Tesouro Encontrado): ");
+        System.out.print("Alvo: ");
         String alvo = scanner.nextLine();
 
         List<String> caminho = otimizacaoServico.buscaProfundidadeDFS(grafo, origem, alvo);
 
-        IO.println("\n[DFS] Caminho de Exploração (Tesouro):");
+        IO.println("\n[DFS] Caminho:");
         if (caminho.isEmpty()) {
             IO.println("Caminho não encontrado ou alvo inalcançável.");
         } else {
