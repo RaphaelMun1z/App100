@@ -23,10 +23,14 @@ public class TipoCorridaServico {
     }
 
     public TipoCorrida obterViaIdBuscaSequencial(Long id) {
+        // Busca sequencial para localizar o tipo de corrida correspondente ao ID solicitado
         for (int ii = 0; ii < tiposCorrida.size(); ii++) {
-            if (tiposCorrida.get(ii).getId().equals(id))
+            if (tiposCorrida.get(ii).getId().equals(id)) {
                 return tiposCorrida.get(ii);
+            }
         }
+
+        // Interrompe o fluxo e alerta caso o ID fornecido não exista na base (lista)
         throw new IndexOutOfBoundsException("Tipo de Corrida não encontrada!");
     }
 }

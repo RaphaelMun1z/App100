@@ -10,7 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+// ==========================================
+// CAMADA DE CONTROLE E INTERFACE (UI)
+// OBJETIVO: Isolar a interação do usuário (I/O) das regras de negócio e algoritmos complexos.
+// ==========================================
 public class GrafoController {
+
+    // Injeção de Dependência através da interface IGrafo.
+    // Isso garante o Polimorfismo: esta mesma tela funciona perfeitamente, sem alterar
+    // uma linha de código, quer estejamos usando a GrafoMatrizService ou a GrafoListaService por baixo.
     private final IGrafo grafo;
     private final Scanner scanner;
     private final InputHandler input;
@@ -26,15 +34,19 @@ public class GrafoController {
     public void exibirMenu(String tipo) {
         Menu menuAcoes = new Menu("MAPA DE GRAFOS (" + tipo + ")");
 
+        // Mapeamento das estruturas teóricas de grafos para as funcionalidades reais do sistema
         menuAcoes.adicionarOpcao(1, "Visualizar Mapa", grafo::imprimirMapa);
         menuAcoes.adicionarOpcao(2, "Gerenciar Cidades/Rotas (CRUD)", this::exibirMenuCRUD);
+
+        // Aplicações Práticas dos Algoritmos de ED2:
         menuAcoes.adicionarOpcao(3, "(DFS) Exploração de Rotas", this::uiBuscaDFS);
         menuAcoes.adicionarOpcao(4, "(BFS) Alcance de Notificação", this::uiBuscaBFS);
         menuAcoes.adicionarOpcao(5, "(Dijkstra) Rota Mais Rápida", this::uiDijkstra);
         menuAcoes.adicionarOpcao(6, "(AGM) Otimizar Rede de Abastecimento", this::uiAGM);
         menuAcoes.adicionarOpcao(7, "(Topológica) Sequenciar Manutenção de Frota", this::uiTopologica);
 
-        menuAcoes.executar(scanner);
+        menuAcoes.
+                executar(scanner);
     }
 
     private void exibirMenuCRUD() {
@@ -50,6 +62,7 @@ public class GrafoController {
         menuCrud.executar(scanner);
     }
 
+    // Coleta as entradas validadas do usuário e repassa para o algoritmo de Caminho Mínimo
     private void uiDijkstra() {
         String origem = input.lerCidadeValidada("Origem (Viagem Inicia): ", grafo);
         String destino = input.lerCidadeValidada("Destino (Viagem Termina): ", grafo);
@@ -110,6 +123,8 @@ public class GrafoController {
         }
     }
 
+    // Demonstração isolada de um Grafo Direcionado Acíclico (DAG).
+    // Cria um microambiente apenas para mostrar a resolução de dependências de tarefas da frota.
     private void uiTopologica() {
         IGrafo grafoDAG = new GrafoListaService();
         grafoDAG.adicionarCidade("Verificar Pneus");
@@ -118,6 +133,7 @@ public class GrafoController {
         grafoDAG.adicionarCidade("Limpar Veiculo");
         grafoDAG.adicionarCidade("Liberar para Rodar");
 
+        // Define a ordem de precedência (o que precisa ser feito antes do que)
         grafoDAG.adicionarRota("Verificar Pneus", "Teste de Freios", 1, false);
         grafoDAG.adicionarRota("Trocar Oleo", "Teste de Freios", 1, false);
         grafoDAG.adicionarRota("Teste de Freios", "Limpar Veiculo", 1, false);
@@ -133,6 +149,9 @@ public class GrafoController {
         }
     }
 
+    // ==========================================
+    // MÉTODOS AUXILIARES DE CRUD E INPUT
+    // ==========================================
     private void uiAdicionarCidade() {
         System.out.print("Nome da nova cidade: ");
         grafo.adicionarCidade(scanner.nextLine());
